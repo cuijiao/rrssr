@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
+import Grid from './Grid'
 
 export default class App extends React.Component {
     render() {
         return (
             <div>
-                Hello {this.props.data}
+                <Grid repos={this.props.data} />
             </div>
         )
     };
