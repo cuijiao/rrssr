@@ -4,6 +4,9 @@ import { renderToString } from "react-dom/server"
 import App from '../shared/App'
 import React from 'react'
 import fetchPopularRepos from '../shared/api'
+import serialize from "serialize-javascript"
+import path from 'path';
+import fs from 'fs';
 
 const app = express();
 
@@ -22,20 +25,17 @@ app.get("*", (req, res, next) => {
                     <App data={data}/>
                 )
 
-                res.send(`
-                    <!DOCTYPE html>
-                    <html>
-                      <head>
-                        <title>SSR with RR</title>
-                        
-                      </head>
-                
-                      <body>
-                        <div id="app">${markup}</div>
-                        <!--<script src='/bundle.js' defer></script>-->
-                      </body>
-                    </html>
-                `);
+                const indexFile = path.resolve('./src/index.html');
+                fs.readFile(indexFile, 'utf8', (err, indexData) => {
+                    return res.send(
+                        indexData
+                            .replace('<div id="root"></div>', `<div id="root">${markup}</div>`)
+                            .replace(
+                                '</body>',
+                                `<script>window.__INITIAL_DATA__ = ${serialize(data)}</script><script src='/bundle.js' defer></script></body>`
+                            )
+                    );
+                });
             })
 });
 
