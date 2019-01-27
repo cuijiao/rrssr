@@ -7,6 +7,7 @@ import fetchPopularRepos from '../shared/api'
 import serialize from "serialize-javascript"
 import path from 'path';
 import fs from 'fs';
+import { StaticRouter } from 'react-router-dom';
 
 const app = express();
 
@@ -17,12 +18,15 @@ app.use(cors());
 // client bundle.js file will end up.
 app.use(express.static("public"));
 
-app.get("*", (req, res, next) => {
+app.get("*", (req, res) => {
+    const context = {};
     fetchPopularRepos()
         .then(
             (data) => {
                 const markup = renderToString(
-                    <App data={data}/>
+                    <StaticRouter location={req.url} context={context}>
+                        <App data={data}/>
+                    </StaticRouter>
                 )
 
                 const indexFile = path.resolve('./src/index.html');
