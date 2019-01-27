@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch'
 
-const fetchPopularRepos = (language = 'all') => {
+export const fetchPopularRepos = (language = 'all') => {
     const encodedURI = encodeURI(`https://api.github.com/search/repositories?q=stars:>1+language:${language}&sort=stars&order=desc&type=Repositories`);
 
     return fetch(encodedURI)
@@ -12,4 +12,12 @@ const fetchPopularRepos = (language = 'all') => {
         });
 };
 
-export default fetchPopularRepos;
+export const loadData = resourceType => {
+    return fetch(`https://jsonplaceholder.typicode.com/${resourceType}`)
+        .then(res => {
+            return res.json();
+        })
+        .then(data => {
+            return data.filter((_, idx) => idx < 10);
+        });
+};

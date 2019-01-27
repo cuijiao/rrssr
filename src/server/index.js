@@ -3,26 +3,32 @@ import cors from "cors"
 import { renderToString } from "react-dom/server"
 import App from '../shared/App'
 import React from 'react'
-import fetchPopularRepos from '../shared/api'
 import serialize from "serialize-javascript"
 import path from 'path';
 import fs from 'fs';
-import { StaticRouter } from 'react-router-dom';
+import { StaticRouter, matchPath } from 'react-router-dom';
+import Routes from '../shared/routes'
 
 const app = express();
 
 app.use(cors());
 
-// We're going to serve up the public
-// folder since that's where our
-// client bundle.js file will end up.
 app.use(express.static("public"));
 
 app.get("*", (req, res) => {
-    const context = {};
-    fetchPopularRepos()
-        .then(
-            (data) => {
+    const currentRoute =
+        Routes.find(route => matchPath(req.url, route)) || {};
+    let promise;
+
+    if (currentRoute.loadData) {
+        promise = currentRoute.loadData();
+    } else {
+        promise = Promise.resolve(null);
+    }
+
+    promise.then(data => {
+                const context = {data};
+
                 const markup = renderToString(
                     <StaticRouter location={req.url} context={context}>
                         <App data={data}/>
