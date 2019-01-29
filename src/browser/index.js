@@ -1,9 +1,9 @@
 import React from 'react'
-import { hydrate } from 'react-dom'
-import App from '../shared/App'
-import { BrowserRouter } from 'react-router-dom'
+import { render } from 'react-dom'
+import { Router, browserHistory } from 'react-router'
+import routes from '../shared/newRoutes'
 
-hydrate(
-    <BrowserRouter><App data={window.__INITIAL_DATA__}/></BrowserRouter>,
+render(
+    <Router routes={routes} history={browserHistory}/>,
     document.getElementById('root')
-);
+)

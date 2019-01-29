@@ -1,13 +1,12 @@
 import express from "express"
 import cors from "cors"
 import { renderToString } from "react-dom/server"
-import App from '../shared/App'
 import React from 'react'
-import serialize from "serialize-javascript"
 import path from 'path';
 import fs from 'fs';
-import { StaticRouter, matchPath } from 'react-router-dom';
-import Routes from '../shared/routes'
+import { match, RouterContext } from 'react-router'
+import routes from '../shared/newRoutes'
+import ReactDOMServer from 'react-dom/server';
 
 const app = express();
 
@@ -15,38 +14,22 @@ app.use(cors());
 
 app.use(express.static("public"));
 
-app.get("*", (req, res) => {
-    const currentRoute =
-        Routes.find(route => matchPath(req.url, route)) || {};
-    let promise;
-
-    if (currentRoute.loadData) {
-        promise = currentRoute.loadData();
-    } else {
-        promise = Promise.resolve(null);
-    }
-
-    promise.then(data => {
-                const context = {data};
-
-                const markup = renderToString(
-                    <StaticRouter location={req.url} context={context}>
-                        <App data={data}/>
-                    </StaticRouter>
-                )
-
-                const indexFile = path.resolve('./src/index.html');
-                fs.readFile(indexFile, 'utf8', (err, indexData) => {
-                    return res.send(
-                        indexData
-                            .replace('<div id="root"></div>', `<div id="root">${markup}</div>`)
-                            .replace(
-                                '</body>',
-                                `<script>window.__INITIAL_DATA__ = ${serialize(data)}</script><script src='/bundle.js' defer></script></body>`
-                            )
-                    );
-                });
-            })
+app.get('*', (req, res) => {
+    // match the routes to the url
+    match({ routes, location: req.url }, (err, redirect, props) => {
+        const appHtml = ReactDOMServer.renderToString(<RouterContext {...props}/>)
+        const indexFile = path.resolve('./src/index.html');
+        return fs.readFile(indexFile, 'utf8', (err, indexData) => {
+            return res.send(
+                indexData
+                    .replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`)
+                    .replace(
+                        '</body>',
+                        `<script src='/bundle.js' defer></script></body>`
+                    )
+            );
+        });
+    })
 });
 
 app.listen(3000, () => {

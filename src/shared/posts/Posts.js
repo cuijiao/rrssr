@@ -35,7 +35,7 @@ class Posts extends React.Component {
     }
 
     render() {
-        return <div><Grid posts={this.state.data}/></div>;
+        return (<div><Grid posts={this.state.data}/></div>);
     }
 }
 

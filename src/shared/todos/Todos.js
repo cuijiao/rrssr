@@ -35,7 +35,7 @@ class Todos extends React.Component {
     }
 
     render() {
-        return <div><Grid todos={this.state.data}/></div>;
+        return (<div><Grid todos={this.state.data}/></div>);
     }
 }
 
