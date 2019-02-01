@@ -23,6 +23,7 @@ app.get('*', (req, res) => {
             return res.send(
                 indexData
                     .replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`)
+                    .replace('</head>', `<link rel="shortcut icon" href="/favicon.ico"></head>`)
                     .replace(
                         '</body>',
                         `<script src='/bundle.js' defer></script></body>`
